@@ -218,18 +218,21 @@ output.addEventListener("input", (e) => {
 
     updateOutput();
 });
+englishBuffer = "";
+output.addEventListener("input", function (e) {
+    englishBuffer = output.innerText;
 
-output.addEventListener("input", function () {
-    let text = output.innerText;
-
-    // your transliteration logic
-    let odiaText = transliterateWord(text);
+    let odiaText = transliterateWord(englishBuffer);
 
     output.innerText = odiaText;
     setCursorToEnd(output);
 
-    updateSuggestions();
+    let words = englishBuffer.split(" ");
+    let lastWord = words[words.length - 1];
+
+    updateSuggestions(lastWord);
 });
+
 output.addEventListener("compositionend", () => {
     updateOutput();
 }); 
