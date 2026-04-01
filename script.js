@@ -183,13 +183,33 @@ function updateOutput() {
 
     text = text.replace(/ /g, "\u00A0");
 
-    output.innerText = text;
+    // output.innerText = text;
+
+    output.textContent = text;
 
     placeCursorEnd(output);
 
     updateSuggestions();
 }
 
+output.addEventListener("input", (e) => {
+    const text = output.innerText.replace(/\u00A0/g, " ");
+    
+    const words = text.split(" ");
+    const lastWord = words[words.length - 1];
+
+    // Extract English letters from last word
+    if (/^[a-zA-Z]+$/.test(lastWord)) {
+        englishBuffer = lastWord;
+        committedText = words.slice(0, -1).join(" ") + " ";
+    }
+
+    updateOutput();
+});
+
+output.addEventListener("compositionend", () => {
+    updateOutput();
+}); 
 
 output.addEventListener("keydown", (e) => {
 
@@ -730,4 +750,5 @@ function transliterateText(text) {
 // (Do NOT modify your rule logic)
 
 });
+
 
