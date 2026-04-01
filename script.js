@@ -183,15 +183,27 @@ function updateOutput() {
 
     text = text.replace(/ /g, "\u00A0");
 
-    // output.innerText = text;
-
-    output.textContent = text;
+    output.innerText = text;
+    setCursorToEnd(output);
+    // output.textContent = text;
 
     placeCursorEnd(output);
 
     updateSuggestions();
 }
 
+function setCursorToEnd(el) {
+    el.focus();
+    if (typeof window.getSelection != "undefined"
+        && typeof document.createRange != "undefined") {
+        let range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+}
 output.addEventListener("input", (e) => {
     const text = output.innerText.replace(/\u00A0/g, " ");
     
@@ -207,6 +219,17 @@ output.addEventListener("input", (e) => {
     updateOutput();
 });
 
+output.addEventListener("input", function () {
+    let text = output.innerText;
+
+    // your transliteration logic
+    let odiaText = transliterateWord(text);
+
+    output.innerText = odiaText;
+    setCursorToEnd(output);
+
+    updateSuggestions();
+});
 output.addEventListener("compositionend", () => {
     updateOutput();
 }); 
@@ -750,5 +773,4 @@ function transliterateText(text) {
 // (Do NOT modify your rule logic)
 
 });
-
 
