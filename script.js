@@ -14,6 +14,7 @@ if (!output) {
 
 let englishBuffer = "";
 let committedText = "";
+let isUpdating = false
 
 /* =========================
    LOAD LANGUAGE MODELS
@@ -168,7 +169,6 @@ function updateSuggestions() {
     } else {
         suggestions = predictNextWord();
     }
-
     showSuggestions(suggestions);
 }
 
@@ -194,16 +194,14 @@ function updateOutput() {
 
 function setCursorToEnd(el) {
     el.focus();
-    if (typeof window.getSelection != "undefined"
-        && typeof document.createRange != "undefined") {
-        let range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(false);
-        let sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
+    let range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    let sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
+
 output.addEventListener("input", (e) => {
     const text = output.innerText.replace(/\u00A0/g, " ");
     
@@ -218,21 +216,30 @@ output.addEventListener("input", (e) => {
 
     updateOutput();
 });
-englishBuffer = "";
-output.addEventListener("input", function (e) {
-    englishBuffer = output.innerText;
 
-    let odiaText = transliterateWord(englishBuffer);
+output.addEventListener("input", function () {
+
+    if (isUpdating) return;
+
+    isUpdating = true;
+
+    let englishText = output.innerText;
+
+    // Transliterate
+    let odiaText = transliterate(englishText);
 
     output.innerText = odiaText;
+
     setCursorToEnd(output);
 
-    let words = englishBuffer.split(" ");
+    // Suggestions
+    let words = englishText.split(" ");
     let lastWord = words[words.length - 1];
 
     updateSuggestions(lastWord);
-});
 
+    isUpdating = false;
+});
 output.addEventListener("compositionend", () => {
     updateOutput();
 }); 
