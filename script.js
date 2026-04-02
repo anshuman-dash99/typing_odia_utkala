@@ -204,7 +204,7 @@ output.addEventListener("beforeinput", (e) => {
 
         if (/^[a-zA-Z]$/.test(ch)) {
             e.preventDefault();
-            englishBuffer += ch.toLowerCase();
+            englishBuffer += ch;
             updateOutput();
         }
     }
@@ -256,7 +256,7 @@ copyBtn.addEventListener("click", async () => {
 
 pasteBtn.addEventListener("click", async () => {
   const text = await navigator.clipboard.readText();
-  englishBuffer += text.toLowerCase();
+  englishBuffer += text;
   updateOutput();
 });
 /* =========================
