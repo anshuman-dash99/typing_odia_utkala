@@ -197,64 +197,172 @@ function updateOutput() {
    MOBILE + DESKTOP INPUT
 ========================= */
 
+let lastChar = "";
+
+const odiaNumbers = {
+  "0": "୦",
+  "1": "୧",
+  "2": "୨",
+  "3": "୩",
+  "4": "୪",
+  "5": "୫",
+  "6": "୬",
+  "7": "୭",
+  "8": "୮",
+  "9": "୯"
+};
+
 output.addEventListener("beforeinput", (e) => {
 
-    // if (e.inputType === "insertText") {
-    //     const ch = e.data;
+    if (e.inputType === "insertText") {
 
-    //     if (/^[a-zA-Z]$/.test(ch)) {
-    //         e.preventDefault();
-    //         englishBuffer += ch;
-    //         updateOutput();
-    //     }
-    // }
-    
+        const ch = e.data;
 
-  if (e.inputType === "insertText") {
-    const ch = e.data;
+        /* =========================
+           LETTERS
+        ========================= */
 
-    // Handle letters
-    if (/^[a-zA-Z]$/.test(ch)) {
-        e.preventDefault();
-        englishBuffer += ch;
-        updateOutput();
-        return;
-    }
-
-    // Handle SPACE (mobile keyboards)
-    if (ch === " ") {
-        e.preventDefault();
-
-        if (englishBuffer.length > 0) {
-            committedText =" " + transliterateWord(englishBuffer);
-            englishBuffer = "";
+        if (/^[a-zA-Z]$/.test(ch)) {
+            e.preventDefault();
+            englishBuffer += ch;
+            updateOutput();
+            return;
         }
 
-        committedText = committedText + " " 
-        updateOutput();
+        /* =========================
+           SPACE
+        ========================= */
 
-        const nextSuggestions=predictNextWord();
-        showSuggestions(nextSuggestions);
-        return;
+        if (ch === " ") {
+            e.preventDefault();
+
+            if (englishBuffer.length > 0) {
+                committedText += transliterateWord(englishBuffer);
+                englishBuffer = "";
+            }
+
+            committedText += " ";
+
+            updateOutput();
+
+            const nextSuggestions = predictNextWord();
+            showSuggestions(nextSuggestions);
+
+            lastChar = " ";
+            return;
+        }
+
+        /* =========================
+           ODIA NUMBERS
+        ========================= */
+
+        if (/[0-9]/.test(ch)) {
+            e.preventDefault();
+
+            if (englishBuffer.length > 0) {
+                committedText += transliterateWord(englishBuffer);
+                englishBuffer = "";
+            }
+
+            committedText += odiaNumbers[ch];
+
+            updateOutput();
+            lastChar = odiaNumbers[ch];
+            return;
+        }
+
+        /* =========================
+           RUPEE SYMBOL
+        ========================= */
+
+        if (ch === "$") {
+            e.preventDefault();
+
+            committedText += "₹";
+            updateOutput();
+
+            lastChar = "₹";
+            return;
+        }
+
+        /* =========================
+           PUNCTUATION
+        ========================= */
+
+        if ([".", ",", "?", "!"].includes(ch)) {
+
+            e.preventDefault();
+
+            if (englishBuffer.length > 0) {
+                committedText += transliterateWord(englishBuffer);
+                englishBuffer = "";
+            }
+
+            if (ch === ".") {
+
+                // Double Purnacheda
+                if (lastChar === "।") {
+                    committedText = committedText.slice(0, -1);
+                    committedText += "॥";
+                    lastChar = "॥";
+                } 
+                else {
+                    committedText += "।";
+                    lastChar = "।";
+                }
+
+            } 
+            else {
+                committedText += ch;
+                lastChar = ch;
+            }
+
+            updateOutput();
+            return;
+        }
+
     }
-  }
+
+    /* =========================
+       BACKSPACE
+    ========================= */
 
     if (e.inputType === "deleteContentBackward") {
         e.preventDefault();
 
         if (englishBuffer.length > 0) {
             englishBuffer = englishBuffer.slice(0, -1);
-        } else {
+        } 
+        else {
             committedText = committedText.slice(0, -1);
         }
 
         updateOutput();
     }
 
+    /* =========================
+       DISABLE ENTER
+    ========================= */
+
     if (e.inputType === "insertParagraph" || e.inputType === "insertLineBreak") {
+
         e.preventDefault();
+
+        if (englishBuffer.length > 0) {
+            committedText += transliterateWord(englishBuffer);
+            englishBuffer = "";
+        }
+
+        committedText += "\n";
+
+        updateOutput();
+
+        lastChar = "\n";
+        return;
     }
+
 });
+
 
 // output.addEventListener("keydown", (e) => {
 //     if (e.key === " ") {
