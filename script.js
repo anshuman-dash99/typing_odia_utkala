@@ -14,7 +14,6 @@ if (!output) {
 
 let englishBuffer = "";
 let committedText = "";
-let isUpdating = false
 
 /* =========================
    LOAD LANGUAGE MODELS
@@ -155,6 +154,8 @@ function insertSuggestion(word) {
 
     updateOutput();
     output.focus();
+
+    placeCursorEnd(output);
 }
 /* =========================
    OUTPUT UPDATE
@@ -169,6 +170,7 @@ function updateSuggestions() {
     } else {
         suggestions = predictNextWord();
     }
+
     showSuggestions(suggestions);
 }
 
@@ -184,76 +186,30 @@ function updateOutput() {
     text = text.replace(/ /g, "\u00A0");
 
     output.innerText = text;
-    setCursorToEnd(output);
-    // output.textContent = text;
 
     placeCursorEnd(output);
 
     updateSuggestions();
 }
 
-function setCursorToEnd(el) {
-    el.focus();
-    let range = document.createRange();
-    range.selectNodeContents(el);
-    range.collapse(false);
-    let sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-}
 
-output.addEventListener("input", (e) => {
-    const text = output.innerText.replace(/\u00A0/g, " ");
-    
-    const words = text.split(" ");
-    const lastWord = words[words.length - 1];
+/* =========================
+   MOBILE + DESKTOP INPUT
+========================= */
 
-    // Extract English letters from last word
-    if (/^[a-zA-Z]+$/.test(lastWord)) {
-        englishBuffer = lastWord;
-        committedText = words.slice(0, -1).join(" ") + " ";
+output.addEventListener("beforeinput", (e) => {
+
+    if (e.inputType === "insertText") {
+        const ch = e.data;
+
+        if (/^[a-zA-Z]$/.test(ch)) {
+            e.preventDefault();
+            englishBuffer += ch.toLowerCase();
+            updateOutput();
+        }
     }
 
-    updateOutput();
-});
-
-output.addEventListener("input", function () {
-
-    if (isUpdating) return;
-
-    isUpdating = true;
-
-    let englishText = output.innerText;
-
-    // Transliterate
-    let odiaText = transliterate(englishText);
-
-    output.innerText = odiaText;
-
-    setCursorToEnd(output);
-
-    // Suggestions
-    let words = englishText.split(" ");
-    let lastWord = words[words.length - 1];
-
-    updateSuggestions(lastWord);
-
-    isUpdating = false;
-});
-output.addEventListener("compositionend", () => {
-    updateOutput();
-}); 
-
-output.addEventListener("keydown", (e) => {
-
-    if (/^[a-zA-Z]$/.test(e.key)) {
-        e.preventDefault();
-        englishBuffer += e.key;
-        updateOutput();
-        return;
-    }
-
-    if (e.key === "Backspace") {
+    if (e.inputType === "deleteContentBackward") {
         e.preventDefault();
 
         if (englishBuffer.length > 0) {
@@ -263,9 +219,14 @@ output.addEventListener("keydown", (e) => {
         }
 
         updateOutput();
-        return;
     }
 
+    if (e.inputType === "insertParagraph" || e.inputType === "insertLineBreak") {
+        e.preventDefault();
+    }
+});
+
+output.addEventListener("keydown", (e) => {
     if (e.key === " ") {
         e.preventDefault();
 
@@ -275,11 +236,8 @@ output.addEventListener("keydown", (e) => {
         }
 
         committedText += " ";
-
         updateOutput();
-        return;
     }
-
 });
 
 /* =========================
@@ -783,4 +741,3 @@ function transliterateText(text) {
 // (Do NOT modify your rule logic)
 
 });
-
