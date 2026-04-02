@@ -226,12 +226,15 @@ output.addEventListener("beforeinput", (e) => {
         e.preventDefault();
 
         if (englishBuffer.length > 0) {
-            committedText += " " + transliterateWord(englishBuffer);
+            committedText = committedText.trimEnd() + " " + transliterateWord(englishBuffer);
             englishBuffer = "";
         }
 
-        committedText += " ";
+        committedText = committedText.trimEnd() + " " 
         updateOutput();
+
+        const nextSuggestions=predictNextWord();
+        showSuggestions(nextSuggestions);
         return;
     }
   }
