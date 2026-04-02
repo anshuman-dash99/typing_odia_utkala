@@ -199,15 +199,42 @@ function updateOutput() {
 
 output.addEventListener("beforeinput", (e) => {
 
-    if (e.inputType === "insertText") {
-        const ch = e.data;
+    // if (e.inputType === "insertText") {
+    //     const ch = e.data;
 
-        if (/^[a-zA-Z]$/.test(ch)) {
-            e.preventDefault();
-            englishBuffer += ch;
-            updateOutput();
-        }
+    //     if (/^[a-zA-Z]$/.test(ch)) {
+    //         e.preventDefault();
+    //         englishBuffer += ch;
+    //         updateOutput();
+    //     }
+    // }
+    
+
+  if (e.inputType === "insertText") {
+    const ch = e.data;
+
+    // Handle letters
+    if (/^[a-zA-Z]$/.test(ch)) {
+        e.preventDefault();
+        englishBuffer += ch;
+        updateOutput();
+        return;
     }
+
+    // Handle SPACE (mobile keyboards)
+    if (ch === " ") {
+        e.preventDefault();
+
+        if (englishBuffer.length > 0) {
+            committedText += " " + transliterateWord(englishBuffer);
+            englishBuffer = "";
+        }
+
+        committedText += " ";
+        updateOutput();
+        return;
+    }
+  }
 
     if (e.inputType === "deleteContentBackward") {
         e.preventDefault();
@@ -226,20 +253,20 @@ output.addEventListener("beforeinput", (e) => {
     }
 });
 
-output.addEventListener("keydown", (e) => {
-    if (e.key === " ") {
-        e.preventDefault();
+// output.addEventListener("keydown", (e) => {
+//     if (e.key === " ") {
+//         e.preventDefault();
 
-        if (englishBuffer.length > 0) {
-            committedText = committedText;
-            committedText += " " +transliterateWord(englishBuffer);
-            englishBuffer = "";
-        }
+//         if (englishBuffer.length > 0) {
+//             committedText = committedText;
+//             committedText += " " +transliterateWord(englishBuffer);
+//             englishBuffer = "";
+//         }
         
-        committedText += " ";
-        updateOutput();
-    }
-});
+//         committedText += " ";
+//         updateOutput();
+//     }
+// });
 
 /* =========================
    BUTTONS
