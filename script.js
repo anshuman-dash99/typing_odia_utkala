@@ -183,7 +183,7 @@ function updateOutput() {
 
     let text = committedText + preview;
 
-    // text = text.replace(/ /g, "\u00A0");
+    text = text.replace(/ /g, "\u00A0");
 
     output.innerText = text;
 
@@ -231,7 +231,7 @@ output.addEventListener("keydown", (e) => {
         e.preventDefault();
 
         if (englishBuffer.length > 0) {
-            committedText = committedText.trimEnd();
+            committedText = committedText;
             committedText += " " +transliterateWord(englishBuffer);
             englishBuffer = "";
         }
