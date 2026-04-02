@@ -144,10 +144,10 @@ function showSuggestions(list) {
 
 function insertSuggestion(word) {
     if (englishBuffer.length > 0) {
-        committedText = committedText.trimEnd() + " " + word;
+        committedText = committedText+ " " + word;
         englishBuffer = "";
     } else {
-        committedText = committedText.trimEnd() + " " + word;
+        committedText = committedText + " " + word;
     }
 
     committedText += " ";
@@ -226,11 +226,11 @@ output.addEventListener("beforeinput", (e) => {
         e.preventDefault();
 
         if (englishBuffer.length > 0) {
-            committedText = committedText.trimEnd() + " " + transliterateWord(englishBuffer);
+            committedText =" " + transliterateWord(englishBuffer);
             englishBuffer = "";
         }
 
-        committedText = committedText.trimEnd() + " " 
+        committedText = committedText + " " 
         updateOutput();
 
         const nextSuggestions=predictNextWord();
