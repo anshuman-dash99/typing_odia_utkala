@@ -95,6 +95,7 @@ body {
   background: #d1d9ec;   /* very light blue */
   color: #1a2a44;
   caret-color: #2f6fed; /* blue cursor */
+  white-space: pre-wrap;
 }
 
 
