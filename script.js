@@ -729,12 +729,13 @@ function isConsonantLikeToken(token) {
 function transliterateWord(word) {
   let i = 0;
   let result = "";
-
-    if (word.endsWith("ah")) {
-  const base = transliterateWord(word.slice(0, -2));
-  return base + "ଃ";
-    }
   while (i < word.length) {
+
+      if (word.slice(i, i + 2) === "ah" && i + 2 === word.length) {
+      result += "ଃ";
+      i += 2;
+      continue;
+      }
     const token = getMatchedToken(word, i);
 
     if (!token) {
