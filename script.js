@@ -732,14 +732,24 @@ function transliterateWord(word) {
   while (i < word.length) {
 
     // Visarga rule: ah only at end
-    if (word.slice(i, i + 2) === "ah") {
-      const nextChar = word[i + 2];
-      if (!nextChar) {
-        result += "ଃ";
-        i += 2;
-        continue;
-      }
-    }
+    // Handle ah logic
+if (word.slice(i, i + 2) === "ah") {
+  const nextChar = word[i + 2];
+
+  // If vowel comes after → ha
+  if (["a","i","u","e","o"].includes(nextChar)) {
+    result += "ହ";
+    i += 1; // Only consume 'h', vowel handled later
+    continue;
+  }
+
+  // If end of word → visarga
+  if (!nextChar) {
+    result += "ଃ";
+    i += 2;
+    continue;
+  }
+}
 
     const token = getMatchedToken(word, i);
 
