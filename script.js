@@ -725,17 +725,22 @@ function isConsonantLikeToken(token) {
   return !!(consonants[token] || conjuncts[token] || specialSyllables[token] || token === "Ny");
 }
 
-
 function transliterateWord(word) {
   let i = 0;
   let result = "";
+
   while (i < word.length) {
 
-      // Visarga only if word ends with ah
-if (word.endsWith("ah")) {
-  const base = transliterateWord(word.slice(0, -2));
-  return base + "ଃ";
-}
+    // VISARGA: ah only if at end of word
+    if (
+      word.slice(i, i + 2) === "ah" &&
+      i + 2 === word.length
+    ) {
+      result += "ଃ";
+      i += 2;
+      continue;
+    }
+
     const token = getMatchedToken(word, i);
 
     if (!token) {
@@ -743,63 +748,61 @@ if (word.endsWith("ah")) {
       continue;
     }
 
+    // Chandrabindu
+    if (token === "MM") {
+      result += "ଁ";
+      i += 2;
+      continue;
+    }
+
+    // Anuswara
+    if (token === "M") {
+      result += "ଂ";
+      i += 1;
+      continue;
+    }
+
+    // Halant
+    if (token === "x") {
+      result += "୍";
+      i += 1;
+      continue;
+    }
+
+    // nya -> ଞ
     if (token === "Ny") {
       result += "ଞ";
       i += 2;
       continue;
     }
 
-    if (token === "x") {
-        result += "୍";
-        i += 1;
-        continue;
-    }
-    if (token === "Th") {
-      const nextVowel = getNextVowelToken(word, i + 2);
-      if (nextVowel) {
-        result += "ଠ" + vowelSigns[nextVowel];
-        i += 2 + nextVowel.length;
-      } else {
-        const nextToken = getMatchedToken(word, i + 2);
-        result += nextToken && isConsonantLikeToken(nextToken) ? "ଠ୍" : "ଠ";
-        i += 2;
-      }
-      continue;
-    }
-
+    // Special signs
     if (specialSigns[token]) {
       result += specialSigns[token];
       i += token.length;
       continue;
     }
 
+    // Special syllables
     if (specialSyllables[token]) {
       result += specialSyllables[token];
       i += token.length;
       continue;
     }
 
+    // Independent vowels
     if (independentVowels[token]) {
       result += independentVowels[token];
       i += token.length;
       continue;
     }
 
+    // Conjuncts
     if (conjuncts[token]) {
       const base = conjuncts[token];
       const nextVowel = getNextVowelToken(word, i + token.length);
 
-      const completeSyllables = new Set([
-        "shri",
-        "kri", "kru", "kre", "kro",
-        "gri", "gru",
-        "pri", "pru",
-        "bri", "bru",
-        "dri", "dru",
-        "tri", "tru"
-      ]);
-
-      if (!completeSyllables.has(token) && nextVowel) {
+      if (nextVowel) {
         result += base + vowelSigns[nextVowel];
         i += token.length + nextVowel.length;
       } else {
@@ -809,6 +812,7 @@ if (word.endsWith("ah")) {
       continue;
     }
 
+    // Consonants
     if (consonants[token]) {
       const base = consonants[token];
       const nextVowel = getNextVowelToken(word, i + token.length);
@@ -831,6 +835,7 @@ if (word.endsWith("ah")) {
     i++;
   }
 
+  // Post corrections
   result = result
     .replace(/ଅା/g, "ଆ")
     .replace(/ଅି/g, "ଇ")
@@ -842,14 +847,10 @@ if (word.endsWith("ah")) {
     .replace(/ଅୋ/g, "ଓ")
     .replace(/ଅୌ/g, "ଔ")
     .replace(/ଶ୍ରି/g, "ଶ୍ରୀ")
-    .replace(/କ୍ରିଷ୍ନ/g, "କ୍ରିଷ୍ଣ")
-    .replace(/କ୍ରିଶ୍ନ/g, "କ୍ରିଷ୍ଣ")
-    .replace(/କ୍ରୁଷ୍ନ/g, "କ୍ରୁଷ୍ଣ")
-    .replace(/କ୍ରୁଶ୍ନ/g, "କ୍ରୁଷ୍ଣ")
+    .replace(/ସ୍ତ୍ରି/g, "ସ୍ତ୍ରୀ")
+    .replace(/କ୍ତ୍ରି/g, "କ୍ତ୍ରୀ")
     .replace(/ନମହ/g, "ନମଃ")
-    //.replace(/ଶହ/g, "ଶଃ")
-    //.replace(/ସହ/g, "ସଃ")
-    //.replace(/ମହ/g, "ମଃ");
+    .replace(/କ୍ରମଶହ/g, "କ୍ରମଶଃ");
 
   return result;
 }
