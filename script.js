@@ -731,11 +731,11 @@ function transliterateWord(word) {
   let result = "";
   while (i < word.length) {
 
-      if (word.slice(i, i + 2) === "ah" && i + 2 === word.length) {
-      result += "ଃ";
-      i += 2;
-      continue;
-      }
+      // Visarga only if word ends with ah
+if (word.endsWith("ah")) {
+  const base = transliterateWord(word.slice(0, -2));
+  return base + "ଃ";
+}
     const token = getMatchedToken(word, i);
 
     if (!token) {
