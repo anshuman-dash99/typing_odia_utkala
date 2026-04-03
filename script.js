@@ -813,11 +813,9 @@ function transliterateWord(word) {
     i++;
   }
     // Correct visarga handling (based on original input)
-  if (word.endsWith("ah")) {
-  // remove last "ହ" and add visarga
-      result = result.replace(/ହ$/, "ଃ");
+  if (word.endsWith("h") && result.endsWith("ହ")) {
+      result = result.slice(0, -1) + "ଃ";
   }
-
   // Fix combinations
   result = result
     .replace(/ଅା/g, "ଆ")
