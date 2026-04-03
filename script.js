@@ -730,6 +730,10 @@ function transliterateWord(word) {
   let i = 0;
   let result = "";
 
+    if (word.endsWith("ah")) {
+  const base = transliterateWord(word.slice(0, -2));
+  return base + "ଃ";
+    }
   while (i < word.length) {
     const token = getMatchedToken(word, i);
 
