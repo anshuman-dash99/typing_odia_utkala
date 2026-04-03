@@ -734,23 +734,34 @@ function transliterateWord(word) {
     // Visarga rule: ah only at end
       // Handle "ah" proper
 
-
       // Handle h (ହ or visarga)
+      // Handle h (simple and correct)
 if (word[i] === "h") {
+    let prev = word[i - 1] || "";
     let next = word[i + 1] || "";
+
     let vowels = "aeiou";
 
-    if (vowels.includes(next)) {
-        // h + vowel → ହ
-        result += "ହ";
-    } else {
-        // h + consonant OR end → visarga
+    // If vowel before h AND consonant after → visarga
+    if (vowels.includes(prev) && next && !vowels.includes(next)) {
         result += "ଃ";
+    }
+    // If h before vowel → ହ
+    else if (vowels.includes(next)) {
+        result += "ହ";
+    }
+    // If end of word after vowel → visarga
+    else if (vowels.includes(prev) && !next) {
+        result += "ଃ";
+    }
+    else {
+        result += "ହ";
     }
 
     i += 1;
     continue;
 }
+
     const token = getMatchedToken(word, i);
 
     if (!token) {
