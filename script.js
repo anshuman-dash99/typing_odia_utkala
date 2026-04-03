@@ -731,14 +731,14 @@ function transliterateWord(word) {
 
   while (i < word.length) {
 
-    // VISARGA: ah only if at end of word
-    if (
-      word.slice(i, i + 2) === "ah" &&
-      i + 2 === word.length
-    ) {
-      result += "ଃ";
-      i += 2;
-      continue;
+    // Visarga rule: ah only at end
+    if (word.slice(i, i + 2) === "ah") {
+      const nextChar = word[i + 2];
+      if (!nextChar) {
+        result += "ଃ";
+        i += 2;
+        continue;
+      }
     }
 
     const token = getMatchedToken(word, i);
@@ -773,20 +773,6 @@ function transliterateWord(word) {
     if (token === "Ny") {
       result += "ଞ";
       i += 2;
-      continue;
-    }
-
-    // Special signs
-    if (specialSigns[token]) {
-      result += specialSigns[token];
-      i += token.length;
-      continue;
-    }
-
-    // Special syllables
-    if (specialSyllables[token]) {
-      result += specialSyllables[token];
-      i += token.length;
       continue;
     }
 
@@ -835,7 +821,7 @@ function transliterateWord(word) {
     i++;
   }
 
-  // Post corrections
+  // Fix combinations
   result = result
     .replace(/ଅା/g, "ଆ")
     .replace(/ଅି/g, "ଇ")
@@ -854,7 +840,6 @@ function transliterateWord(word) {
 
   return result;
 }
-
 function transliterateText(text) {
   let result = "";
   let currentWord = "";
