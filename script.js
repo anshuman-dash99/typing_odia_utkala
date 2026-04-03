@@ -703,108 +703,107 @@ function isRomanLetter(ch) {
   return /[A-Za-z]/.test(ch);
 }
 
-function getMatchedToken(text, index) {
-  for (const token of tokenOrder) {
-    if (text.startsWith(token, index)) {
-      return token;
-    }
-  }
-  return null;
-}
-
-function getNextVowelToken(text, index) {
-  for (const v of vowelTokens) {
-    if (text.startsWith(v, index)) {
-      return v;
-    }
-  }
-  return null;
-}
-
-function isConsonantLikeToken(token) {
-  return !!(consonants[token] || conjuncts[token] || specialSyllables[token] || token === "Ny");
-}
-
 function transliterateWord(word) {
   let i = 0;
   let result = "";
 
+  const vowels = "aeiou";
+
   while (i < word.length) {
 
-    // Visarga rule: ah only at end
-      // Handle "ah" proper
-
-      // Handle h (ହ or visarga)
-      // Handle h (simple and correct)
-if (word[i] === "h") {
-    let prev = word[i - 1] || "";
-    let next = word[i + 1] || "";
-
-    let vowels = "aeiou";
-
-    // If vowel before h AND consonant after → visarga
-    if (vowels.includes(prev) && next && !vowels.includes(next)) {
-        result += "ଃ";
-    }
-    // If h before vowel → ହ
-    else if (vowels.includes(next)) {
-        result += "ହ";
-    }
-    // If end of word after vowel → visarga
-    else if (vowels.includes(prev) && !next) {
-        result += "ଃ";
-    }
-    else {
-        result += "ହ";
-    }
-
-    i += 1;
-    continue;
-}
-
     const token = getMatchedToken(word, i);
-
     if (!token) {
       i++;
       continue;
     }
 
-    // Chandrabindu
+    // =============================
+    // 1. Handle h (VERY IMPORTANT FIX)
+    // =============================
+    if (token === "h") {
+      let prev = word[i - 1] || "";
+      let nextToken = getMatchedToken(word, i + 1);
+      let nextChar = word[i + 1] || "";
+
+      // If next is vowel → ହ (and let vowel logic handle matra)
+      if (vowels.includes(nextChar)) {
+        result += "ହ";
+        i += 1;
+        continue;
+      }
+
+      // If vowel before AND next is consonant → visarga
+      if (vowels.includes(prev) && nextToken && isConsonantLikeToken(nextToken)) {
+        result += "ଃ";
+        i += 1;
+        continue;
+      }
+
+      // If end of word after vowel → visarga
+      if (vowels.includes(prev) && i === word.length - 1) {
+        result += "ଃ";
+        i += 1;
+        continue;
+      }
+
+      // Default → ହ
+      result += "ହ";
+      i += 1;
+      continue;
+    }
+
+    // =============================
+    // 2. Chandrabindu
+    // =============================
     if (token === "MM") {
       result += "ଁ";
       i += 2;
       continue;
     }
 
-    // Anuswara
+    // =============================
+    // 3. Anuswara
+    // =============================
     if (token === "M") {
       result += "ଂ";
       i += 1;
       continue;
     }
 
-    // Halant
+    // =============================
+    // 4. Halant
+    // =============================
     if (token === "x") {
       result += "୍";
       i += 1;
       continue;
     }
 
-    // nya -> ଞ
+    // =============================
+    // 5. nya
+    // =============================
     if (token === "Ny") {
       result += "ଞ";
       i += 2;
       continue;
     }
 
-    // Independent vowels
+    // =============================
+    // 6. Independent vowels (ONLY at start or after space)
+    // =============================
     if (independentVowels[token]) {
-      result += independentVowels[token];
+      if (i === 0) {
+        result += independentVowels[token];
+      } else {
+        result += vowelSigns[token] || "";
+      }
       i += token.length;
       continue;
     }
 
-    // Conjuncts
+    // =============================
+    // 7. Conjuncts
+    // =============================
     if (conjuncts[token]) {
       const base = conjuncts[token];
       const nextVowel = getNextVowelToken(word, i + token.length);
@@ -819,7 +818,9 @@ if (word[i] === "h") {
       continue;
     }
 
-    // Consonants
+    // =============================
+    // 8. Consonants
+    // =============================
     if (consonants[token]) {
       const base = consonants[token];
       const nextVowel = getNextVowelToken(word, i + token.length);
@@ -841,8 +842,10 @@ if (word[i] === "h") {
 
     i++;
   }
-    // Correct visarga handling (based on original input)
-  // Fix combinations
+
+  // =============================
+  // 9. Fix combinations
+  // =============================
   result = result
     .replace(/ଅା/g, "ଆ")
     .replace(/ଅି/g, "ଇ")
@@ -860,7 +863,9 @@ if (word[i] === "h") {
     .replace(/କ୍ରମଶହ/g, "କ୍ରମଶଃ");
 
   return result;
-}
+          }
+
+
 function transliterateText(text) {
   let result = "";
   let currentWord = "";
