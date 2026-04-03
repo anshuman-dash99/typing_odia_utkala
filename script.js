@@ -847,9 +847,9 @@ function transliterateWord(word) {
     .replace(/କ୍ରୁଷ୍ନ/g, "କ୍ରୁଷ୍ଣ")
     .replace(/କ୍ରୁଶ୍ନ/g, "କ୍ରୁଷ୍ଣ")
     .replace(/ନମହ/g, "ନମଃ")
-    .replace(/ଶହ/g, "ଶଃ")
-    .replace(/ସହ/g, "ସଃ")
-    .replace(/ମହ/g, "ମଃ");
+    //.replace(/ଶହ/g, "ଶଃ")
+    //.replace(/ସହ/g, "ସଃ")
+    //.replace(/ମହ/g, "ମଃ");
 
   return result;
 }
